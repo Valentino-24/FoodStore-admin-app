@@ -6,6 +6,7 @@ import { AuthLayout } from "@/components/layout/AuthLayout";
 import { LoginPage } from "@/modules/auth/pages/LoginPage";
 import { DashboardPage } from "@/modules/dashboard/pages/DashboardPage";
 import { CategoriasPage } from "@/modules/categorias/pages/CategoriasPage";
+import { IngredientesPage } from "@/modules/ingredientes/pages/IngredientesPage";
 
 const router = createBrowserRouter([
     {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
             {
                 path: 'categorias',
                 element: <CategoriasPage />
+            },
+            {
+                path: 'ingredientes',
+                element: <IngredientesPage />,
             },
         ],
     },
