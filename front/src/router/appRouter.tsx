@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { LoginPage } from "@/modules/auth/pages/LoginPage";
 import { DashboardPage } from "@/modules/dashboard/pages/DashboardPage";
+import { CategoriasPage } from "@/modules/categorias/pages/CategoriasPage";
 
 const router = createBrowserRouter([
     {
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
             {
                 path: 'dashboard',
                 element: <DashboardPage />,
+            },
+            {
+                path: 'categorias',
+                element: <CategoriasPage />
             },
         ],
     },
