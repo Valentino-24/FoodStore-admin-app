@@ -9,6 +9,7 @@ import { CategoriasPage } from "@/modules/categorias/pages/CategoriasPage";
 import { IngredientesPage } from "@/modules/ingredientes/pages/IngredientesPage";
 import { ProductosPage } from "@/modules/productos/pages/ProductosPage";
 import { PedidosPage } from "@/modules/pedidos/pages/PedidosPage";
+import { UsuariosPage } from "@/modules/usuarios/pages/UsuariosPage";
 
 const router = createBrowserRouter([
     {
@@ -56,6 +57,14 @@ const router = createBrowserRouter([
             {
                 path: 'pedidos',
                 element: <PedidosPage />,
+            },
+            {
+                path: 'usuarios',
+                element: (
+                    <PrivateRoute requiredRole="ADMIN">
+                        <UsuariosPage />
+                    </PrivateRoute>
+                ),
             },
         ],
     },
