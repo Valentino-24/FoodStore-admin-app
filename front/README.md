@@ -1,73 +1,70 @@
-# React + TypeScript + Vite
+# FoodStore — Admin App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Panel de administración del sistema FoodStore. Permite gestionar productos, categorías, ingredientes, pedidos y usuarios.
 
-Currently, two official plugins are available:
+## Tecnologías
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 + TypeScript
+- Vite
+- Tailwind CSS v4
+- React Router DOM v7
+- TanStack Query v5
+- TanStack Table v8
+- Axios
+- Zustand v5
 
-## React Compiler
+## Requisitos previos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 18 o superior
+- pnpm
 
-## Expanding the ESLint configuration
+## Instalación
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Configuración
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Crear un archivo `.env` en la raíz de la carpeta `front/` basándose en `.env.example`:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
+
+## Levantar el proyecto
+
+```bash
+pnpm dev
+```
+
+La app estará disponible en `http://localhost:5173`.
+
+## Estructura de carpetas
+src/
+├── api/              # Funciones de llamadas HTTP (axios)
+├── components/
+│   └── layout/       # AppLayout (sidebar) y AuthLayout (login)
+├── modules/          # Módulos por dominio
+│   ├── auth/         # Login
+│   ├── categorias/   # Gestión de categorías y subcategorías
+│   ├── ingredientes/ # Gestión de ingredientes
+│   ├── productos/    # Gestión de productos
+│   ├── pedidos/      # Gestión y seguimiento de pedidos
+│   └── usuarios/     # Gestión de usuarios (solo ADMIN)
+├── router/           # Configuración de rutas y protección
+├── stores/           # Estado global con Zustand
+└── types/            # Interfaces y tipos TypeScript
+
+## Roles del sistema
+
+| Rol | Acceso |
+|-----|--------|
+| ADMIN | CRUD completo de todo el sistema |
+| PEDIDOS | Ver y avanzar estados de pedidos |
+| STOCK | Habilitar/deshabilitar productos |
+| CLIENT | Sin acceso al panel de administración |
+
+## Autenticación
+
+La autenticación usa JWT almacenado en una cookie httpOnly. El navegador la envía automáticamente en cada request. Al iniciar la app se verifica la sesión contra el backend via `GET /auth/me`.
