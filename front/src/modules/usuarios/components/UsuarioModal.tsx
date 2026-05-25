@@ -1,59 +1,55 @@
 import { useEffect, useState } from "react";
-import type { Categoria, CategoriaCreate, CategoriaUpdate } from "@/api/categoriasApi";
+import type { Usuario, UsuarioUpdate } from "@/api/usuariosApi";
 
-interface CategoriaModalProps {
+interface EditUsuarioModalProps {
     isOpen: boolean
     onClose: () => void
-    onSubmit: (data: CategoriaCreate | CategoriaUpdate) => void
-    categorias: Categoria[]
-    categoriaEditing: Categoria | null
+    onSubmit: (data: UsuarioUpdate) => void
+    usuarioEditing: Usuario | null
     isLoading: boolean
 }
 
-export function CategoriaModal({
+const ROLES = ['ADMIN', 'STOCK', 'PEDIDOS', 'CLIENT']
+
+export function EditUsuarioModal({
     isOpen,
     onClose,
     onSubmit,
-    categorias,
-    categoriaEditing,
+    usuarioEditing,
     isLoading,
-} : CategoriaModalProps) {
+}: EditUsuarioModalProps) {
     const [nombre, setNombre] = useState('')
-    const [descripcion, setDescripcion] = useState('')
-    const [parentId, setParentId] = useState<number | null>(null)
+    const [email, setEmail] = useState('')
+    const [rol, setRol] = useState('')
 
     useEffect(() => {
-        if (categoriaEditing) {
-            setNombre(categoriaEditing.nombre)
-            setDescripcion(categoriaEditing.descripcion ?? '')
-            setParentId(categoriaEditing.parent_id)
+        if (usuarioEditing) {
+            setNombre(usuarioEditing.nombre)
+            setEmail(usuarioEditing.email)
+            setRol(usuarioEditing.rol)
         } else {
             setNombre('')
-            setDescripcion('')
-            setParentId(null)
+            setEmail('')
+            setRol('')
         }
-    }, [categoriaEditing, isOpen])
+    }, [usuarioEditing, isOpen])
 
     if (!isOpen) return null
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         onSubmit({
-            nombre,
-            descripcion: descripcion || undefined,
-            parent_id: parentId,
+            nombre: nombre || undefined,
+            email: email || undefined,
+            rol: rol || undefined,
         })
     }
-
-    const categoriasFiltradas = categorias.filter(
-        (c) => c.id !== categoriaEditing?.id,
-    )
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
                 <h2 className="mb-4 text-lg font-bold text-slate-900">
-                    {categoriaEditing ? 'Editar Categoría' : 'Nueva Categoría'}
+                    Editar Usuario
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -68,40 +64,38 @@ export function CategoriaModal({
                         required
                         disabled={isLoading}
                         className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none disabled:bg-slate-100"
-                        placeholder="Nombre de la categoría"
+                        placeholder="Nombre del usuario"
                         />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-slate-700">
-                            Descripción
+                            Email
                         </label>
                         <input 
-                        type="text"
-                        value={descripcion}
-                        onChange={(e) => setDescripcion(e.target.value)}
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
                         disabled={isLoading}
                         className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none disabled:bg-slate-100"
-                        placeholder="Descripción opcional"
+                        placeholder="email@ejemplo.com"
                         />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-slate-700">
-                            Categoría Padre     
+                            Rol
                         </label>
                         <select
-                        value={parentId ?? ''}
-                        onChange={(e) =>
-                            setParentId(e.target.value ? Number(e.target.value) : null)
-                        }
+                        value={rol}
+                        onChange={(e) => setRol(e.target.value)}
                         disabled={isLoading}
                         className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none disabled:bg-slate-100"
                         >
-                            <option value="">Sin categoría padre (raíz)</option>
-                            {categoriasFiltradas.map((c) => (
-                                <option key={c.id}  value={c.id}>
-                                    {c.nombre}
+                            {ROLES.map((r) => (
+                                <option key={r} value={r}>
+                                    {r}
                                 </option>
                             ))}
                         </select>

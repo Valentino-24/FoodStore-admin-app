@@ -23,9 +23,11 @@ interface UsuariosResponse {
 
 const ADMIN = '/admin'
 
-export async function getUsuarios(): Promise<Usuario[]> {
-    const response = await apiClient.get<UsuariosResponse>(`${ADMIN}/usuarios`)
-    return response.data.items
+export async function getUsuarios(skip = 0, limit = 20): Promise<{ items: Usuario[]; total: number }> {
+    const response = await apiClient.get<UsuariosResponse>(`${ADMIN}/usuarios`, {
+        params: { skip, limit }
+    })
+    return { items: response.data.items, total: response.data.total }
 }
 
 export async function updateUsuario(id: number, data: UsuarioUpdate): Promise<Usuario> {

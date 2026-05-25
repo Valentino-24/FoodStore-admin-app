@@ -1,9 +1,41 @@
-import { useUsuarios, useDeleteUsuario } from "../hooks/useUsuarios";
+import { useState } from "react";
+import { useUsuarios, useDeleteUsuario, useUpdateUsuario } from "../hooks/useUsuarios";
 import { UsuariosTable } from "../components/UsuariosTable";
+import { UsuarioModal } from "../components/UsuarioModal";
+import type { Usuario, UsuarioUpdate } from "@/api/usuariosApi";
+
+const PAGE_SIZE = 10;
 
 export function UsuariosPage() {
-    const { data: usuarios = [], isLoading, isError } = useUsuarios()
+    const [page, setPage] = useState(0)
+    const skip = page * PAGE_SIZE
+
+    const { data, isLoading, isError } = useUsuarios(skip, PAGE_SIZE)
+    const usuarios = data?.items ?? []
+    const total = data?.total ?? 0
+    const totalPages = Math.ceil(total / PAGE_SIZE)
+
     const deleteUsuario = useDeleteUsuario()
+    const updateUsuario = useUpdateUsuario()
+
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [usuarioEditing, setUsuarioEditing] = useState<Usuario | null>(null)
+
+    const handleOpenEdit = (usuario: Usuario) => {
+        setUsuarioEditing(usuario)
+        setIsModalOpen(true)
+    }
+
+    const handleClose = () => {
+        setIsModalOpen(false)
+        setUsuarioEditing(null)
+    }
+
+    const handleSubmit = async (data: UsuarioUpdate) => {
+        if (!usuarioEditing) return
+        await updateUsuario.mutateAsync({ id: usuarioEditing.id, data })
+        handleClose()
+    }
 
     const handleDelete = async (id: number) => {
         if (!confirm('¿Estás seguro de que querés eliminar este usuario?')) return
@@ -37,7 +69,41 @@ export function UsuariosPage() {
 
             <UsuariosTable 
             data={usuarios}
+            onEdit={handleOpenEdit}
             onDelete={handleDelete}
+            />
+
+            {/* Paginación */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-5 py-3">
+                    <p className="text-sm text-slate-500">
+                        Página {page + 1} de {totalPages} ({total} usuarios)
+                    </p>
+                    <div className="flex gap-2">
+                        <button
+                        onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        disabled={page === 0}
+                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Anterior
+                        </button>
+                        <button
+                        onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                        disabled={page >= totalPages - 1}
+                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <UsuarioModal 
+            isOpen={isModalOpen}
+            onClose={handleClose}
+            onSubmit={handleSubmit}
+            usuarioEditing={usuarioEditing}
+            isLoading={updateUsuario.isPending}
             />
         </div>
     )

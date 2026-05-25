@@ -39,13 +39,13 @@ export function IngredienteModal({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-                <h2 className="mb-4 text-lg font-bold text-zinc-900">
+                <h2 className="mb-4 text-lg font-bold text-slate-900">
                     {ingredienteEditing ? 'Editar Ingrediente' : 'Nuevo Ingrediente'}
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700">
+                        <label className="block text-sm font-medium text-slate-700">
                             Nombre
                         </label>
                         <input 
@@ -54,7 +54,7 @@ export function IngredienteModal({
                         onChange={(e) => setNombre(e.target.value)}
                         required
                         disabled={isLoading}
-                        className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none disabled:bg-zinc-100"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none disabled:bg-slate-100"
                         placeholder="Nombre del ingrediente"
                         />
                     </div>
@@ -66,9 +66,9 @@ export function IngredienteModal({
                         checked={esAlergeno}
                         onChange={(e) => setEsAlergeno(e.target.checked)}
                         disabled={isLoading}
-                        className="h-4 w-4 rounded border-zinc-300"
+                        className="h-4 w-4 rounded border-slate-300"
                         />
-                        <label htmlFor="esAlergeno" className="text-sm font-medium text-zinc-700">
+                        <label htmlFor="esAlergeno" className="text-sm font-medium text-slate-700">
                             Es alérgeno
                         </label>
                     </div>
@@ -78,14 +78,14 @@ export function IngredienteModal({
                         type="button"
                         onClick={onClose}
                         disabled={isLoading}
-                        className="rounded-lg border border-zinc-200 px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+                        className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                         >
                             Cancelar
                         </button>
                         <button
                         type="submit"
                         disabled={isLoading}
-                        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
                         >
                             {isLoading ? 'Guardando...' : 'Guardar'}
                         </button>

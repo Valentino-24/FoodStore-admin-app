@@ -94,13 +94,13 @@ export function ProductoModal({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto my-4">
-                <h2 className="mb-4 text-lg font-bold text-zinc-900">
+                <h2 className="mb-4 text-lg font-bold text-slate-900">
                     {productoEditing ? 'Editar Producto' : 'Nuevo Producto'}
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700">
+                        <label className="block text-sm font-medium text-slate-700">
                             Nombre
                         </label>
                         <input 
@@ -109,13 +109,13 @@ export function ProductoModal({
                         onChange={(e) => setNombre(e.target.value)}
                         required
                         disabled={isLoading}
-                        className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none disabled:bg-zinc-100"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none disabled:bg-slate-100"
                         placeholder="Nombre del producto"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700">
+                        <label className="block text-sm font-medium text-slate-700">
                             Descripción
                         </label>
                         <input 
@@ -123,7 +123,7 @@ export function ProductoModal({
                         value={descripcion}
                         onChange={(e) => setDescripcion(e.target.value)}
                         disabled={isLoading}
-                        className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none disabled:bg-zinc-100"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none disabled:bg-slate-100"
                         placeholder="Descripción opcional"
                         />
                     </div>
@@ -144,7 +144,7 @@ export function ProductoModal({
 
                     <div className="flex-gap-4">
                         <div className="flex-1">
-                            <label className="block text-sm font-medium text-zinc-700">
+                            <label className="block text-sm font-medium text-slate-700">
                                 Precio
                             </label>
                             <input 
@@ -155,13 +155,13 @@ export function ProductoModal({
                             onChange={(e) => setPrecioBase(e.target.value)}
                             required
                             disabled={isLoading}
-                            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none disabled:bg-zinc-100"
+                            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none disabled:bg-slate-100"
                             placeholder="0.00"
                             />
                         </div>
 
                         <div className="flex-1">
-                            <label className="block text-sm font-medium text-zinc-700">
+                            <label className="block text-sm font-medium text-slate-700">
                                 Stock
                             </label>
                             <input 
@@ -171,7 +171,7 @@ export function ProductoModal({
                             onChange={(e) => setStockCantidad(e.target.value)}
                             required
                             disabled={isLoading}
-                            className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none disabled:bg-zinc-100"
+                            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none disabled:bg-slate-100"
                             placeholder="0"
                             />
                         </div>
@@ -184,20 +184,20 @@ export function ProductoModal({
                         checked={disponible}
                         onChange={(e) => setDisponible(e.target.checked)}
                         disabled={isLoading}
-                        className="h-4 w-4 rounded border-zinc-300" 
+                        className="h-4 w-4 rounded border-slate-300" 
                         />
-                        <label htmlFor="disponible" className="text-sm font-medium text-zinc-700">
+                        <label htmlFor="disponible" className="text-sm font-medium text-slate-700">
                             Disponible
                         </label>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
                             Categorías
                         </label>
-                        <div className="max-h-36 overflow-y-auto rounded-lg border border-zinc-300 p-3 space-y-2">
+                        <div className="max-h-36 overflow-y-auto rounded-lg border border-slate-300 p-3 space-y-2">
                             {categorias.length === 0 ? (
-                                <p className="text-sm text-zinc-400">No hay categorías cargadas</p>
+                                <p className="text-sm text-slate-400">No hay categorías cargadas</p>
                             ) : (
                                 categorias.map((c) => {
                                     const seleccionada = categoriasSeleccionadas.find((cs) => cs.id === c.id)
@@ -209,9 +209,9 @@ export function ProductoModal({
                                             checked={!!seleccionada}
                                             onChange={() => handleToggleCategoria(c.id)}
                                             disabled={isLoading}
-                                            className="h-4 w-4 rounded border-zinc-300"
+                                            className="h-4 w-4 rounded border-slate-300"
                                             />
-                                            <label htmlFor={`cat-${c.id}`} className="text-sm text-zinc-700 flex-1">
+                                            <label htmlFor={`cat-${c.id}`} className="text-sm text-slate-700 flex-1">
                                                 {c.nombre}
                                             </label>
                                             {seleccionada && (
@@ -220,8 +220,8 @@ export function ProductoModal({
                                                 onClick={() => handleTogglePrincipal(c.id)}
                                                 className={`rounded-full px-2 py-0.5 text-xs ${
                                                     seleccionada.es_principal
-                                                        ? 'bg-zinc-900 text-white'
-                                                        : 'bg-zinc-100 text-zinc-600'
+                                                        ? 'bg-slate-900 text-white'
+                                                        : 'bg-slate-100 text-slate-600'
                                                     }`}
                                                 >
                                                     {seleccionada.es_principal ? 'Principal' : 'Secundaria'}
@@ -235,12 +235,12 @@ export function ProductoModal({
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
                             Ingredientes
                         </label>
-                        <div className="max-h-36 overflow-y-auto rounded-lg border border-zinc-300 p-3 space-y-2">
+                        <div className="max-h-36 overflow-y-auto rounded-lg border border-slate-300 p-3 space-y-2">
                             {ingredientes.length === 0 ? (
-                                <p className="text-sm text-zinc-400">No hay ingredientes cargados</p>
+                                <p className="text-sm text-slate-400">No hay ingredientes cargados</p>
                             ) : (
                                 ingredientes.map((i) => (
                                     <div key={i.id} className="flex items-center gap-2">
@@ -250,9 +250,9 @@ export function ProductoModal({
                                         checked={ingredienteIds.includes(i.id)} 
                                         onChange={() => handleToggleIngrediente(i.id)}
                                         disabled={isLoading}
-                                        className="h-4 w-4 rounded border-zinc-300"
+                                        className="h-4 w-4 rounded border-slate-300"
                                         />
-                                        <label htmlFor={`ing-${i.id}`} className="text-sm text-zinc-700">
+                                        <label htmlFor={`ing-${i.id}`} className="text-sm text-slate-700">
                                             {i.nombre}
                                             {i.es_alergeno && (
                                                 <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700">
@@ -271,14 +271,14 @@ export function ProductoModal({
                         type="button"
                         onClick={onClose}
                         disabled={isLoading}
-                        className="rounded-lg border border-zinc-200 px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+                        className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                         >
                             Cancelar
                         </button>
                         <button
                         type="submit"
                         disabled={isLoading}
-                        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
                         >
                             {isLoading ? 'Guardando...' : 'Guardar'}
                         </button>

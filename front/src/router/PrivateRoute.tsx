@@ -15,7 +15,7 @@ export function PrivateRoute({ children, requiredRole }: PrivateRouteProps) {
     if (isLoading) {
         return (
             <div className="flex h-screen items-center justify-center">
-                <p className="text-zinc-500">Cargando...</p>
+                <p className="text-slate-500">Cargando...</p>
             </div>
         )
     }

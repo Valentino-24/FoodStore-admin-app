@@ -8,12 +8,13 @@ import type { Usuario } from "@/api/usuariosApi";
 
 interface UsuariosTableProps {
     data: Usuario[]
+    onEdit: (usuario: Usuario) => void
     onDelete: (id: number) => void
 }
 
 const columnHelper = createColumnHelper<Usuario>()
 
-export function UsuariosTable({ data, onDelete }: UsuariosTableProps) {
+export function UsuariosTable({ data, onEdit, onDelete }: UsuariosTableProps) {
     const columns = [
         columnHelper.accessor('id', {
           header: 'ID',
@@ -53,12 +54,20 @@ export function UsuariosTable({ data, onDelete }: UsuariosTableProps) {
           header: 'Acciones',
           cell: (info) =>
             info.row.original.deleted_at === null ? (
-              <button
-              onClick={() => onDelete(info.row.original.id)}
-              className="rounded-lg bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
-              >
-                Eliminar
-              </button>
+              <div className="flex gap-2">
+                <button
+                onClick={() => onEdit(info.row.original)}
+                className="rounded-lg bg-slate-100 px-3 py-1 text-sm text-slate-700 hover:bg-slate-200"
+                >
+                  Editar
+                </button>
+                <button
+                onClick={() => onDelete(info.row.original.id)}
+                className="rounded-lg bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
+                >
+                  Eliminar
+                </button>
+              </div>
             ) : (
               <span className="text-xs text-slate-400">Eliminado</span>
             ),

@@ -8,10 +8,10 @@ import {
 
 const QUERY_KEY = ['usuarios']
 
-export function useUsuarios() {
+export function useUsuarios(skip = 0, limit = 20) {
   return useQuery({
-    queryKey: QUERY_KEY,
-    queryFn: getUsuarios,
+    queryKey: [...QUERY_KEY, { skip, limit }],
+    queryFn: () => getUsuarios(skip, limit),
   })
 }
 

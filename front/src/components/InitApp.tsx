@@ -12,8 +12,8 @@ export function InitApp({ children }: { children: ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-zinc-50">
-        <p className="text-zinc-500">Cargando...</p>
+      <div className="flex h-screen items-center justify-center bg-slate-50">
+        <p className="text-slate-500">Cargando...</p>
       </div>
     )
   }
