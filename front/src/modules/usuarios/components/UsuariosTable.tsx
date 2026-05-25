@@ -8,19 +8,18 @@ import type { Usuario } from "@/api/usuariosApi";
 
 interface UsuariosTableProps {
     data: Usuario[]
-    onActivar: (id: number) => void
-    onDesactivar: (id: number) => void
+    onDelete: (id: number) => void
 }
 
 const columnHelper = createColumnHelper<Usuario>()
 
-export function UsuariosTable({ data, onActivar, onDesactivar }: UsuariosTableProps) {
+export function UsuariosTable({ data, onDelete }: UsuariosTableProps) {
     const columns = [
         columnHelper.accessor('id', {
           header: 'ID',
           cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('full_name', {
+        columnHelper.accessor('nombre', {
           header: 'Nombre',
           cell: (info) => info.getValue(),
         }),
@@ -28,25 +27,18 @@ export function UsuariosTable({ data, onActivar, onDesactivar }: UsuariosTablePr
           header: 'Email',
           cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('roles', {
-          header: 'Roles',
+        columnHelper.accessor('rol', {
+          header: 'Rol',
           cell: (info) => (
-            <div className="flex gap-1 flex-wrap">
-              {info.getValue().map((rol) => (
-                <span
-                  key={rol}
-                  className="rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700"
-                >
-                  {rol}
-                </span>
-              ))}
-            </div>
+            <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700">
+              {info.getValue()}
+            </span>
           ),
         }),
-        columnHelper.accessor('is_active', {
+        columnHelper.accessor('deleted_at', {
           header: 'Estado',
           cell: (info) =>
-            info.getValue() ? (
+            info.getValue() === null ? (
               <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
                 Activo
               </span>
@@ -59,24 +51,16 @@ export function UsuariosTable({ data, onActivar, onDesactivar }: UsuariosTablePr
         columnHelper.display({
           id: 'acciones',
           header: 'Acciones',
-          cell: (info) => (
-            <div className="flex gap-2">
-              {info.row.original.is_active ? (
-                <button
-                  onClick={() => onDesactivar(info.row.original.id)}
-                  className="rounded-lg bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
-                >
-                  Desactivar
-                </button>
-              ) : (
-                <button
-                  onClick={() => onActivar(info.row.original.id)}
-                  className="rounded-lg bg-green-50 px-3 py-1 text-sm text-green-600 hover:bg-green-100"
-                >
-                  Activar
-                </button>
-              )}
-            </div>
+          cell: (info) =>
+            info.row.original.deleted_at === null ? (
+              <button
+              onClick={() => onDelete(info.row.original.id)}
+              className="rounded-lg bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
+              >
+                Eliminar
+              </button>
+            ) : (
+              <span className="text-xs text-zinc-400">Eliminado</span>
             ),
         }),
     ]

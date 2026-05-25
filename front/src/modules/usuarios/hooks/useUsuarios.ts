@@ -2,8 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
     getUsuarios,
     updateUsuario,
-    desactivarUsuario,
-    activarUsuario,
+    deleteUsuario,
     type UsuarioUpdate,
 } from "@/api/usuariosApi";
 
@@ -27,20 +26,10 @@ export function useUpdateUsuario() {
   })
 }
 
-export function useDesactivarUsuario() {
+export function useDeleteUsuario() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => desactivarUsuario(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-    },
-  })
-}
-
-export function useActivarUsuario() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (id: number) => activarUsuario(id),
+    mutationFn: (id: number) => deleteUsuario(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },

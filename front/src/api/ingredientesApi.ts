@@ -3,16 +3,19 @@ import apiClient from "./axiosInstance";
 export interface Ingrediente {
     id: number
     nombre: string
+    descripción: string | null
     es_alergeno: boolean
 }
 
 export interface IngredienteCreate {
     nombre: string
+    descripcion?: string
     es_alergeno: boolean
 }
 
 export interface IngredienteUpdate {
     nombre?: string
+    descripcion?: string
     es_alergeno?: boolean
 }
 
@@ -29,7 +32,7 @@ export async function createIngrediente(data: IngredienteCreate): Promise<Ingred
 }
 
 export async function updateIngrediente(id: number, data: IngredienteUpdate): Promise<Ingrediente> {
-    const response = await apiClient.patch<Ingrediente>(`$[INGREDIENTES]/${id}`, data)
+    const response = await apiClient.put<Ingrediente>(`$[INGREDIENTES]/${id}`, data)
     return response.data
 }
 

@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
     getPedidos,
-    avanzarEstado,
-    cancelarPedido,
+    cambiarEstado,
+    getEstadosPosibles,
+    type CambioEstadoRequest,
 } from "@/api/pedidosApi";
 
 const QUERY_KEY = ['pedidos']
@@ -14,22 +15,21 @@ export function usePedidos() {
     })
 }
 
-export function useAvanzarEstado() {
+export function useCambiarEstado() {
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: (id: number) => avanzarEstado(id),
+        mutationFn: ({ id, data}: { id: number; data: CambioEstadoRequest }) =>
+            cambiarEstado(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEY })
         },
     })
 }
 
-export function useCancelarPedido() {
-    const queryClient = useQueryClient()
-    return useMutation({
-        mutationFn: (id: number) => cancelarPedido(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
-        },
+export function useEstadosPosibles(pedidoId: number) {
+    return useQuery({
+        queryKey: ['estados-posibles', pedidoId],
+        queryFn: () => getEstadosPosibles(pedidoId),
+        enabled: pedidoId > 0,
     })
 }

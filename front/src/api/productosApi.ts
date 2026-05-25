@@ -1,43 +1,59 @@
 import apiClient from "./axiosInstance";
-import type { Ingrediente } from "./ingredientesApi";
-import type { Categoria } from "./categoriasApi";
+
+export interface CategoriaSimple {
+    id: number
+    nombre: string
+    es_principal: boolean
+}
+
+export interface IngredienteSimple {
+    id: number
+    nombre: string
+}
+
+export interface CategoriaInput {
+    id: number
+    es_principal: boolean
+}
 
 export interface Producto {
     id: number
     nombre: string
     descripcion: string | null
-    precio: number
-    disponible: boolean
+    precio_base: number
+    imagenes: string | null
     stock_cantidad: number
-    categoria_id: number
-    categoria: Categoria
-    ingredientes: Ingrediente[]
+    disponible: boolean
+    categorias: CategoriaSimple[]
+    ingredientes: IngredienteSimple[]
 }
 
 export interface ProductoCreate {
     nombre: string
     descripcion?: string
-    precio: number
-    disponible: boolean
+    precio_base: number
+    imagenes?: string
     stock_cantidad: number
-    categoria_id: number
-    ingrediente_ids: number[]
+    disponible: boolean
+    categorias: CategoriaInput[]
+    ingredientes_ids: number[]
 }
 
 export interface ProductoUpdate {
     nombre?: string
     descripcion?: string
-    precio?: number
-    disponible?: boolean
+    precio_base?: number
+    imagenes?: string
     stock_cantidad?: number
-    categoria_id?: number
-    ingrediente_ids?: number[]
+    disponible?: boolean
+    categorias?: CategoriaInput[]
+    ingredientes_ids?: number[]
 }
 
 const PRODUCTOS = '/productos'
 
 export async function getProductos(): Promise<Producto[]> {
-    const response = await apiClient.get<Producto[]>(PRODUCTOS)
+    const response = await apiClient.get<Producto[]>(`${PRODUCTOS}/all`)
     return response.data
 }
 
@@ -47,7 +63,7 @@ export async function createProducto(data: ProductoCreate): Promise<Producto> {
 }
 
 export async function updateProducto(id: number, data: ProductoUpdate): Promise<Producto> {
-    const response = await apiClient.patch<Producto>(`${PRODUCTOS}/${id}`, data)
+    const response = await apiClient.put<Producto>(`${PRODUCTOS}/${id}`, data)
     return response.data
 }
 
@@ -56,6 +72,10 @@ export async function deleteProducto(id: number): Promise<void> {
 }
 
 export async function updateDisponibilidad(id: number, disponible: boolean): Promise<Producto> {
-    const response = await apiClient.patch<Producto>(`${PRODUCTOS}/${id}/disponibilidad`, { disponible })
+    const response = await apiClient.patch<Producto>(
+        `${PRODUCTOS}/${id}/disponibilidad`,
+        null,
+    { params: { disponible } }
+    )
     return response.data
 }

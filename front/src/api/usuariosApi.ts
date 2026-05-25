@@ -3,35 +3,29 @@ import apiClient from "./axiosInstance";
 export interface Usuario {
     id: number
     email: string
-    full_name: string
-    is_active: boolean
-    roles: string[]
+    nombre: string
+    rol: string
+    deleted_at: string | null
 }
 
 export interface UsuarioUpdate {
-    full_name?: string
-    is_active?: boolean
-    roles?: string[]
+    nombre?: string
+    email?: string
+    rol?: string
 }
 
-const USUARIOS = '/admin/usuarios'
+const ADMIN = '/admin'
 
 export async function getUsuarios(): Promise<Usuario[]> {
-    const response = await apiClient.get<Usuario[]>(USUARIOS)
+    const response = await apiClient.get<Usuario[]>(`${ADMIN}/usuarios`)
     return response.data
 }
 
 export async function updateUsuario(id: number, data: UsuarioUpdate): Promise<Usuario> {
-    const response = await apiClient.patch<Usuario>(`${USUARIOS}/${id}`, data)
+    const response = await apiClient.put<Usuario>(`${ADMIN}/usuarios/${id}`, data)
     return response.data
 }
 
-export async function desactivarUsuario(id: number): Promise<Usuario> {
-    const response = await apiClient.post<Usuario>(`${USUARIOS}/${id}/desactivar`)
-    return response.data
-}
-
-export async function activarUsuario(id: number): Promise<Usuario> {
-    const response = await apiClient.post<Usuario>(`${USUARIOS}/${id}/activar`)
-    return response.data
+export async function deleteUsuario(id: number): Promise<void> {
+    await apiClient.delete(`${ADMIN}/usuarios/${id}`)
 }

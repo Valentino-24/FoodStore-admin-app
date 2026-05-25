@@ -1,18 +1,13 @@
-import { useUsuarios, useActivarUsuario, useDesactivarUsuario } from "../hooks/useUsuarios";
+import { useUsuarios, useDeleteUsuario } from "../hooks/useUsuarios";
 import { UsuariosTable } from "../components/UsuariosTable";
 
 export function UsuariosPage() {
     const { data: usuarios = [], isLoading, isError } = useUsuarios()
-    const activarUsuario = useActivarUsuario()
-    const desactivarUsuario = useDesactivarUsuario()
+    const deleteUsuario = useDeleteUsuario()
 
-    const handleActivar = async (id: number) => {
-        await activarUsuario.mutateAsync(id)
-    }
-
-    const handleDesactivar = async (id: number) => {
-        if (!confirm('¿Estás seguro de que querés desactivar este usuario?')) return
-        await desactivarUsuario.mutateAsync(id)
+    const handleDelete = async (id: number) => {
+        if (!confirm('¿Estás seguro de que querés eliminar este usuario?')) return
+        await deleteUsuario.mutateAsync(id)
     }
 
     if (isLoading) {
@@ -42,8 +37,7 @@ export function UsuariosPage() {
 
             <UsuariosTable 
             data={usuarios}
-            onActivar={handleActivar}
-            onDesactivar={handleDesactivar}
+            onDelete={handleDelete}
             />
         </div>
     )

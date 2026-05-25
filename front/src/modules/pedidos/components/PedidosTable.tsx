@@ -4,17 +4,17 @@ import {
     flexRender,
     createColumnHelper,
 } from "@tanstack/react-table";
-import type { Pedido, EstadoPedido } from "@/api/pedidosApi";
+import type { Pedido, EstadoPedido, CambioEstadoRequest } from "@/api/pedidosApi";
+import { useEstadosPosibles } from "../hooks/usePedidos";
 
 interface PedidosTableProps {
     data: Pedido[]
-    onAvanzar: (id: number) => void
-    onCancelar: (id: number) => void
+    onCambiarEstado: (id: number, data: CambioEstadoRequest) => void
 }
 
 const columnHelper = createColumnHelper<Pedido>()
 
-const estadoColors: Record<EstadoPedido, string> = {
+const estadoColors: Record<string, string> = {
     PENDIENTE: 'bg-yellow-100 text-yellow-700',
     CONFIRMADO: 'bg-blue-100 text-blue-700',
     EN_PREP: 'bg-orange-100 text-orange-700',
@@ -23,14 +23,37 @@ const estadoColors: Record<EstadoPedido, string> = {
     CANCELADO: 'bg-red-100 text-red-700',
 }
 
-const estadoSiguiente: Partial<Record<EstadoPedido, string>> = {
-    PENDIENTE: 'Confirmar',
-    CONFIRMADO: 'En preparación',
-    EN_PREP: 'En camino',
-    EN_CAMINO: 'Entregar',
+function AccionesCell({
+  pedido,
+  onCambiarEstado,
+}: {
+  pedido: Pedido
+  onCambiarEstado: (id: number, data: CambioEstadoRequest) => void
+}) {
+  const { data: estadosPosibles = [] } = useEstadosPosibles(pedido.id)
+
+  if (estadosPosibles.length === 0) return <span className="text-xs text-zinc-400">Sin acciones</span>
+
+  return (
+    <div className="flex gap-2 flex-wrap">
+      {estadosPosibles.map((estado: EstadoPedido) => (
+        <button
+          key={estado.id}
+          onClick={() => onCambiarEstado(pedido.id, { nuevo_estado_id: estado.id })}
+          className={`rounded-lg px-3 py-1 text-sm ${
+            estado.codigo === 'CANCELADO'
+              ? 'bg-red-50 text-red-600 hover:bg-red-100'
+              : 'bg-zinc-900 text-white hover:bg-zinc-700'
+          }`}
+        >
+          {estado.nombre}
+        </button>
+      ))}
+    </div>
+  )
 }
 
-export function PedidosTable({ data, onAvanzar, onCancelar }: PedidosTableProps) {
+export function PedidosTable({ data, onCambiarEstado }: PedidosTableProps) {
     const columns = [
         columnHelper.accessor('id', {
             header: 'ID',
@@ -40,49 +63,41 @@ export function PedidosTable({ data, onAvanzar, onCancelar }: PedidosTableProps)
             header: 'Cliente ID',
             cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('estado', {
+        columnHelper.accessor('estado_actual', {
             header: 'Estado',
-            cell: (info) => (
+            cell: (info) => {
+                const estado = info.getValue()
+                if (!estado) return '-'
+                return (
                 <span
-                className={`rounded-full px-2 py-1 text-xs font-medium ${estadoColors[info.getValue()]}`}
+                className={`rounded-full px-2 py-1 text-xs font-medium ${estadoColors[estado.codigo] ?? 'bg-zinc-100 text-zinc-700'}`}
                 >
-                    {info.getValue()}
+                    {estado.nombre}
                 </span>
-            ),
+                )
+            },
         }),
-        columnHelper.accessor('fecha_creacion', {
+        columnHelper.accessor('total', {
+            header: 'Total',
+            cell: (info) => `$${info.getValue().toFixed(2)}`,
+        }),
+        columnHelper.accessor('fecha_pedido', {
             header: 'Fecha',
             cell: (info) => new Date(info.getValue()).toLocaleDateString('es-AR'),
+        }),
+        columnHelper.accessor('forma_pago', {
+            header: 'Forma de Pago',
+            cell: (info) => info.getValue()?.nombre ?? '-',
         }),
         columnHelper.display({
             id: 'acciones',
             header: 'Acciones',
-            cell: (info) => {
-                const estado = info.row.original.estado
-                const puedeAvanzar = estado in estadoSiguiente
-                const puedeCancelar = estado === 'PENDIENTE' || estado === 'CONFIRMADO'
-
-                return (
-                    <div className="flex gap-2">
-                        {puedeAvanzar && (
-                            <button
-                            onClick={() => onAvanzar(info.row.original.id)}
-                            className="rounded-lg bg-zinc-900 px-3 py-1 text-sm text-white hover:bg-zinc-700"
-                            >
-                                {estadoSiguiente[estado]}
-                            </button>
-                        )}
-                        {puedeCancelar && (
-                            <button
-                            onClick={() => onCancelar(info.row.original.id)}
-                            className="rounded-lg bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
-                            >
-                                Cancelar
-                            </button>
-                        )}
-                    </div>
-                )
-            },
+            cell: (info) => (
+                <AccionesCell 
+                pedido={info.row.original}
+                onCambiarEstado={onCambiarEstado}
+                />
+            ),
         }),
     ]
 

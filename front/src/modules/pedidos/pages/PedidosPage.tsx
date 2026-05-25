@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/stores/useAuthStore";
-import { usePedidos, useAvanzarEstado, useCancelarPedido } from "../hooks/usePedidos";
+import { usePedidos, useCambiarEstado } from "../hooks/usePedidos";
 import { PedidosTable } from "../components/PedidosTable";
+import type { CambioEstadoRequest } from "@/api/pedidosApi";
 
 export function PedidosPage() {
     const user = useAuthStore((s) => s.user)
@@ -8,16 +9,10 @@ export function PedidosPage() {
     const isPedidos = user?.roles.includes('PEDIDOS') ?? false
 
     const { data: pedidos = [], isLoading, isError } = usePedidos()
-    const avanzarEstado = useAvanzarEstado()
-    const cancelarPedido = useCancelarPedido()
+    const cambiarEstado = useCambiarEstado()
 
-    const handleAvanzar = async (id: number) => {
-        await avanzarEstado.mutateAsync(id)
-    }
-
-    const handleCancelar = async (id: number) => {
-        if (!confirm('¿Estás seguro de que querés cancelar este pedido?')) return
-        await cancelarPedido.mutateAsync(id)
+    const handleCambiarEstado = async (id: number, data: CambioEstadoRequest) => {
+        await cambiarEstado.mutateAsync({ id, data })
     }
 
     if (isLoading) {
@@ -55,8 +50,7 @@ export function PedidosPage() {
 
             <PedidosTable 
             data={pedidos}
-            onAvanzar={handleAvanzar}
-            onCancelar={handleCancelar}
+            onCambiarEstado={handleCambiarEstado}
             />
         </div>
     )

@@ -32,11 +32,15 @@ export function ProductosTable({
       header: 'Nombre',
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor('categoria', {
-      header: 'Categoría',
-      cell: (info) => info.getValue()?.nombre ?? '-',
+    columnHelper.accessor('categorias', {
+      header: 'Categorías',
+      cell: (info) => {
+        const categorias = info.getValue()
+        if (!categorias || categorias.length === 0) return '-'
+        return categorias.map((c) => c.nombre).join(', ')
+      },
     }),
-    columnHelper.accessor('precio', {
+    columnHelper.accessor('precio_base', {
       header: 'Precio',
       cell: (info) => `$${info.getValue().toFixed(2)}`,
     }),

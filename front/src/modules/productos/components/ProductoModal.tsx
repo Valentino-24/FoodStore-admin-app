@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Categoria } from "@/api/categoriasApi";
 import type { Ingrediente } from "@/api/ingredientesApi";
-import type { Producto, ProductoCreate, ProductoUpdate } from "@/api/productosApi";
+import type { Producto, ProductoCreate, ProductoUpdate, CategoriaInput } from "@/api/productosApi";
 
 interface ProductoModalProps {
     isOpen: boolean
@@ -24,33 +24,49 @@ export function ProductoModal({
 }: ProductoModalProps) {
     const [nombre, setNombre] = useState('')
     const [descripcion, setDescripcion] = useState('')
-    const [precio, setPrecio] = useState('')
+    const [precioBase, setPrecioBase] = useState('')
     const [stockCantidad, setStockCantidad] = useState('')
     const [disponible, setDisponible] = useState(true)
-    const [categoriaId, setCategoriaId] = useState<number | null>(null)
+    const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<CategoriaInput[]>([])
     const [ingredienteIds, setIngredienteIds] = useState<number[]>([])
 
     useEffect(() => {
         if (productoEditing) {
             setNombre(productoEditing.nombre)
             setDescripcion(productoEditing.descripcion ?? '')
-            setPrecio(productoEditing.precio.toString())
+            setPrecioBase(productoEditing.precio_base.toString())
             setStockCantidad(productoEditing.stock_cantidad.toString())
             setDisponible(productoEditing.disponible)
-            setCategoriaId(productoEditing.categoria_id)
+            setCategoriasSeleccionadas(
+                productoEditing.categorias.map((c) => ({ id: c.id, es_principal: c.es_principal }))
+            )
             setIngredienteIds(productoEditing.ingredientes.map((i) => i.id))
         } else {
             setNombre('')
             setDescripcion('')
-            setPrecio('')
+            setPrecioBase('')
             setStockCantidad('')
             setDisponible(true)
-            setCategoriaId(null)
+            setCategoriasSeleccionadas([])
             setIngredienteIds([])
         }
     }, [productoEditing, isOpen])
 
     if (!isOpen) return null
+
+    const handleToggleCategoria = (id: number) => {
+        setCategoriasSeleccionadas((prev) => {
+            const existe = prev.find((c) => c.id === id)
+            if (existe) return prev.filter((c) => c.id !== id)
+            return [...prev, { id, es_principal: prev.length === 0 }]
+        })
+    }
+
+    const handleTogglePrincipal = (id: number) => {
+        setCategoriasSeleccionadas((prev) => 
+            prev.map((c) => ({ ...c, es_principal: c.id === id }))  
+        )
+    }
 
     const handleToggleIngrediente = (id: number) => {
         setIngredienteIds((prev) =>
@@ -63,11 +79,11 @@ export function ProductoModal({
         onSubmit({
             nombre,
             descripcion: descripcion || undefined,
-            precio: Number(precio),
+            precio_base: Number(precioBase),
             stock_cantidad: Number(stockCantidad),
             disponible,
-            categoria_id: categoriaId!,
-            ingrediente_ids: ingredienteIds,
+            categorias: categoriasSeleccionadas,
+            ingredientes_ids: ingredienteIds,
         })
     }
 
@@ -117,8 +133,8 @@ export function ProductoModal({
                             type="number"
                             min="0"
                             step="0.01"
-                            value={precio}
-                            onChange={(e) => setPrecio(e.target.value)}
+                            value={precioBase}
+                            onChange={(e) => setPrecioBase(e.target.value)}
                             required
                             disabled={isLoading}
                             className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none disabled:bg-zinc-100"
@@ -142,27 +158,7 @@ export function ProductoModal({
                             />
                         </div>
                     </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-zinc-700">
-                            Categoría
-                        </label>
-                        <select 
-                        value={categoriaId ?? ''}
-                        onChange={(e) => setCategoriaId(Number(e.target.value))}
-                        required
-                        disabled={isLoading}
-                        className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 focus:border-zinc-500 focus:outline-none disabled:bg-zinc-100"
-                        >
-                            <option value="">Seleccioná una categoría</option>
-                            {categorias.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                    {c.nombre}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
+                    
                     <div className="flex items-center gap-3">
                         <input 
                         type="checkbox"
@@ -175,6 +171,49 @@ export function ProductoModal({
                         <label htmlFor="disponible" className="text-sm font-medium text-zinc-700">
                             Disponible
                         </label>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-2">
+                            Categorías
+                        </label>
+                        <div className="max-h-36 overflow-y-auto rounded-lg border border-zinc-300 p-3 space-y-2">
+                            {categorias.length === 0 ? (
+                                <p className="text-sm text-zinc-400">No hay categorías cargadas</p>
+                            ) : (
+                                categorias.map((c) => {
+                                    const seleccionada = categoriasSeleccionadas.find((cs) => cs.id === c.id)
+                                    return (
+                                        <div key={c.id} className="flex items-center gap-3">
+                                            <input 
+                                            type="checkbox"
+                                            id={`cat-${c.id}`}
+                                            checked={!!seleccionada}
+                                            onChange={() => handleToggleCategoria(c.id)}
+                                            disabled={isLoading}
+                                            className="h-4 w-4 rounded border-zinc-300"
+                                            />
+                                            <label htmlFor={`cat-${c.id}`} className="text-sm text-zinc-700 flex-1">
+                                                {c.nombre}
+                                            </label>
+                                            {seleccionada && (
+                                                <button
+                                                type="button"
+                                                onClick={() => handleTogglePrincipal(c.id)}
+                                                className={`rounded-full px-2 py-0.5 text-xs ${
+                                                    seleccionada.es_principal
+                                                        ? 'bg-zinc-900 text-white'
+                                                        : 'bg-zinc-100 text-zinc-600'
+                                                    }`}
+                                                >
+                                                    {seleccionada.es_principal ? 'Principal' : 'Secundaria'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )
+                                })
+                            )}
+                        </div>
                     </div>
 
                     <div>
@@ -209,7 +248,7 @@ export function ProductoModal({
                         </div>
                     </div>
 
-                    <div>
+                    <div className="flex justify-end gap-2 pt-2">
                         <button
                         type="button"
                         onClick={onClose}
