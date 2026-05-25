@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useUsuarios, useDeleteUsuario, useUpdateUsuario } from "../hooks/useUsuarios";
+import { useUsuarios, useCreateUsuario, useDeleteUsuario, useUpdateUsuario } from "../hooks/useUsuarios";
 import { UsuariosTable } from "../components/UsuariosTable";
 import { UsuarioModal } from "../components/UsuarioModal";
-import type { Usuario, UsuarioUpdate } from "@/api/usuariosApi";
+import type { Usuario, UsuarioCreate, UsuarioUpdate } from "@/api/usuariosApi";
 
 const PAGE_SIZE = 10;
 
@@ -15,11 +15,17 @@ export function UsuariosPage() {
     const total = data?.total ?? 0
     const totalPages = Math.ceil(total / PAGE_SIZE)
 
+    const createUsuario = useCreateUsuario()
     const deleteUsuario = useDeleteUsuario()
     const updateUsuario = useUpdateUsuario()
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [usuarioEditing, setUsuarioEditing] = useState<Usuario | null>(null)
+
+    const handleOpenCreate = () => {
+        setUsuarioEditing(null)
+        setIsModalOpen(true)
+    }
 
     const handleOpenEdit = (usuario: Usuario) => {
         setUsuarioEditing(usuario)
@@ -31,9 +37,12 @@ export function UsuariosPage() {
         setUsuarioEditing(null)
     }
 
-    const handleSubmit = async (data: UsuarioUpdate) => {
-        if (!usuarioEditing) return
-        await updateUsuario.mutateAsync({ id: usuarioEditing.id, data })
+    const handleSubmit = async (data: UsuarioUpdate | UsuarioCreate) => {
+        if (usuarioEditing) {
+            await updateUsuario.mutateAsync({ id: usuarioEditing.id, data: data as UsuarioUpdate })
+        } else {
+            await createUsuario.mutateAsync(data as UsuarioCreate)
+        }
         handleClose()
     }
 
@@ -65,6 +74,15 @@ export function UsuariosPage() {
                 <p className="text-sm text-slate-500">
                     Gestión de usuarios del sistema
                 </p>
+            </div>
+
+            <div className="flex justify-end">
+                <button
+                onClick={handleOpenCreate}
+                className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+                >
+                    <span>+</span> Nuevo Usuario
+                </button>
             </div>
 
             <UsuariosTable 
@@ -103,7 +121,7 @@ export function UsuariosPage() {
             onClose={handleClose}
             onSubmit={handleSubmit}
             usuarioEditing={usuarioEditing}
-            isLoading={updateUsuario.isPending}
+            isLoading={createUsuario.isPending || updateUsuario.isPending}
             />
         </div>
     )

@@ -44,19 +44,35 @@ const router = createBrowserRouter([
             },
             {
                 path: 'categorias',
-                element: <CategoriasPage />
+                element: (
+                    <PrivateRoute requiredRole="ADMIN">
+                        <CategoriasPage />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: 'ingredientes',
-                element: <IngredientesPage />,
+                element: (
+                    <PrivateRoute requiredRole="ADMIN">
+                        <IngredientesPage />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: 'productos',
-                element: <ProductosPage />,
+                element: (
+                    <PrivateRoute requiredRole={['ADMIN', 'STOCK']}>
+                        <ProductosPage />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: 'pedidos',
-                element: <PedidosPage />,
+                element: (
+                    <PrivateRoute requiredRole={['ADMIN', 'PEDIDOS']}>
+                        <PedidosPage />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: 'usuarios',

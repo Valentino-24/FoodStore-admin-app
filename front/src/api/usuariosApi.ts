@@ -14,6 +14,13 @@ export interface UsuarioUpdate {
     rol?: string
 }
 
+export interface UsuarioCreate {
+    email: string
+    password: string
+    nombre: string
+    rol: string
+}
+
 interface UsuariosResponse {
     items: Usuario[]
     total: number
@@ -28,6 +35,11 @@ export async function getUsuarios(skip = 0, limit = 20): Promise<{ items: Usuari
         params: { skip, limit }
     })
     return { items: response.data.items, total: response.data.total }
+}
+
+export async function createUsuario(data: UsuarioCreate): Promise<Usuario> {
+    const response = await apiClient.post<Usuario>(`${ADMIN}/usuarios`, data)
+    return response.data
 }
 
 export async function updateUsuario(id: number, data: UsuarioUpdate): Promise<Usuario> {

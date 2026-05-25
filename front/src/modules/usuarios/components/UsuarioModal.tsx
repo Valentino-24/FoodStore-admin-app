@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import type { Usuario, UsuarioUpdate } from "@/api/usuariosApi";
+import type { Usuario, UsuarioUpdate, UsuarioCreate } from "@/api/usuariosApi";
 
 interface EditUsuarioModalProps {
     isOpen: boolean
     onClose: () => void
-    onSubmit: (data: UsuarioUpdate) => void
+    onSubmit: (data: UsuarioUpdate | UsuarioCreate) => void
     usuarioEditing: Usuario | null
     isLoading: boolean
 }
 
 const ROLES = ['ADMIN', 'STOCK', 'PEDIDOS', 'CLIENT']
+
+const isCreate = (usuario: Usuario | null): usuario is null => usuario === null
 
 export function UsuarioModal({
     isOpen,
@@ -20,17 +22,22 @@ export function UsuarioModal({
 }: EditUsuarioModalProps) {
     const [nombre, setNombre] = useState('')
     const [email, setEmail] = useState('')
-    const [rol, setRol] = useState('')
+    const [password, setPassword] = useState('')
+    const [rol, setRol] = useState('STOCK')
+
+    const creating = isCreate(usuarioEditing)
 
     useEffect(() => {
         if (usuarioEditing) {
             setNombre(usuarioEditing.nombre)
             setEmail(usuarioEditing.email)
             setRol(usuarioEditing.rol)
+            setPassword('')
         } else {
             setNombre('')
             setEmail('')
-            setRol('')
+            setPassword('')
+            setRol('STOCK')
         }
     }, [usuarioEditing, isOpen])
 
@@ -38,18 +45,27 @@ export function UsuarioModal({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        onSubmit({
-            nombre: nombre || undefined,
-            email: email || undefined,
-            rol: rol || undefined,
-        })
+        if (creating) {
+            onSubmit({
+                nombre,
+                email,
+                password,
+                rol,
+            } as UsuarioCreate)
+        } else {
+            onSubmit({
+                nombre: nombre || undefined,
+                email: email || undefined,
+                rol: rol || undefined,
+            } as UsuarioUpdate)
+        }
     }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
                 <h2 className="mb-4 text-lg font-bold text-slate-900">
-                    Editar Usuario
+                    {creating ? 'Nuevo Usuario' : 'Editar Usuario'}
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -83,6 +99,23 @@ export function UsuarioModal({
                         />
                     </div>
 
+                    {creating && (
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700">
+                                Contraseña
+                            </label>
+                            <input 
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            disabled={isLoading}
+                            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none disabled:bg-slate-100"
+                            placeholder="••••••••"
+                            />
+                        </div>
+                    )}
+
                     <div>
                         <label className="block text-sm font-medium text-slate-700">
                             Rol
@@ -115,7 +148,7 @@ export function UsuarioModal({
                         disabled={isLoading}
                         className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
                         >
-                            {isLoading ? 'Guardando...' : 'Guardar'}
+                            {isLoading ? 'Guardando...' : creating ? 'Crear Usuario' : 'Guardar'}
                         </button>
                     </div>
                 </form>

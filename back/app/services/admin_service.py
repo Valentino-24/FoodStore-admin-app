@@ -2,9 +2,50 @@ from typing import Optional, List
 
 from fastapi import HTTPException
 
+from app.core.security import hash_password
 from app.core.uow import UnitOfWork
 from app.models.usuario import Usuario
 from app.models.usuario_rol import UsuarioRol
+from app.models.rol import Rol
+
+
+def create_usuario(data) -> dict:
+    """Crea un usuario (empleado) con el rol especificado. Solo para ADMIN."""
+    VALID_ROLES = {"ADMIN", "STOCK", "PEDIDOS", "CLIENT"}
+
+    rol_upper = data.rol.upper() if data.rol else "CLIENT"
+    if rol_upper not in VALID_ROLES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Rol inválido. Debe ser uno de: {', '.join(sorted(VALID_ROLES))}",
+        )
+
+    with UnitOfWork() as uow:
+        existing = uow.usuarios.get_by_email(data.email)
+        if existing:
+            raise HTTPException(status_code=400, detail="El email ya está registrado")
+
+        usuario = Usuario(
+            email=data.email,
+            hashed_password=hash_password(data.password),
+            nombre=data.nombre,
+            rol=rol_upper,
+        )
+        uow.usuarios.create(usuario)
+
+        # Asignar el rol en la tabla UsuarioRol
+        rol_obj = uow.roles.get_by_codigo(rol_upper)
+        if rol_obj:
+            uow.session.add(UsuarioRol(usuario_id=usuario.id, rol_id=rol_obj.id))
+
+        uow.commit()
+
+        return {
+            "id": usuario.id,
+            "email": usuario.email,
+            "nombre": usuario.nombre,
+            "rol": usuario.rol,
+        }
 
 
 def list_usuarios(

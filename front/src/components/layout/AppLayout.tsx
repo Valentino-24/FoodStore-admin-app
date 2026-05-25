@@ -2,13 +2,15 @@ import { Outlet, NavLink } from 'react-router-dom'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useNavigate } from 'react-router-dom'
 
-const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: '⊞' },
-  { to: '/categorias', label: 'Categorías', icon: '◫' },
-  { to: '/ingredientes', label: 'Ingredientes', icon: '⚗' },
-  { to: '/productos', label: 'Productos', icon: '▦' },
-  { to: '/pedidos', label: 'Pedidos', icon: '🗒' },
-  { to: '/usuarios', label: 'Usuarios', icon: '👤' },
+type NavItem = { to: string; label: string; icon: string; roles: string[] }
+
+const allNavItems: NavItem[] = [
+  { to: '/dashboard', label: 'Dashboard', icon: '⊞', roles: ['ADMIN', 'STOCK', 'PEDIDOS'] },
+  { to: '/categorias', label: 'Categorías', icon: '◫', roles: ['ADMIN'] },
+  { to: '/ingredientes', label: 'Ingredientes', icon: '⚗', roles: ['ADMIN'] },
+  { to: '/productos', label: 'Productos', icon: '▦', roles: ['ADMIN', 'STOCK'] },
+  { to: '/pedidos', label: 'Pedidos', icon: '🗒', roles: ['ADMIN', 'PEDIDOS'] },
+  { to: '/usuarios', label: 'Usuarios', icon: '👤', roles: ['ADMIN'] },
 ]
 
 export function AppLayout() {
@@ -33,7 +35,9 @@ export function AppLayout() {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5">
-          {navItems.map((item) => (
+          {allNavItems
+            .filter((item) => item.roles.some((r) => user?.roles.includes(r)))
+            .map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

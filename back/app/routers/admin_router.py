@@ -5,9 +5,18 @@ from fastapi import APIRouter, Depends, Query
 from app.models.usuario import Usuario
 from app.services import admin_service
 from app.core.dependencies import require_admin
-from app.schemas.admin import UsuarioAdminUpdate, AsignarRolesRequest
+from app.schemas.admin import UsuarioAdminUpdate, UsuarioCreateAdmin, AsignarRolesRequest
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
+
+
+@router.post("/usuarios")
+def create_usuario(
+    data: UsuarioCreateAdmin,
+    _: Usuario = Depends(require_admin),
+):
+    """Crear un nuevo usuario (empleado) con rol específico."""
+    return admin_service.create_usuario(data)
 
 
 @router.get("/usuarios")

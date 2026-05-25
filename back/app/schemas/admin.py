@@ -17,5 +17,12 @@ class UsuarioAdminUpdate(SQLModel):
     rol: Optional[str] = None
 
 
+class UsuarioCreateAdmin(SQLModel):
+    email: str
+    password: str
+    nombre: str
+    rol: str = "CLIENT"  # ADMIN, STOCK, PEDIDOS, CLIENT
+
+
 class AsignarRolesRequest(SQLModel):
     roles_ids: List[int]

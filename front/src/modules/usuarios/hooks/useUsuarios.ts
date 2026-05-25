@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
     getUsuarios,
+    createUsuario,
     updateUsuario,
     deleteUsuario,
+    type UsuarioCreate,
     type UsuarioUpdate,
 } from "@/api/usuariosApi";
 
@@ -12,6 +14,16 @@ export function useUsuarios(skip = 0, limit = 20) {
   return useQuery({
     queryKey: [...QUERY_KEY, { skip, limit }],
     queryFn: () => getUsuarios(skip, limit),
+  })
+}
+
+export function useCreateUsuario() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: UsuarioCreate) => createUsuario(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
   })
 }
 

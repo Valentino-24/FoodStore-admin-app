@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 interface PrivateRouteProps {
     children: ReactNode
-    requiredRole?: string
+    requiredRole?: string | string[]
 }
 
 export function PrivateRoute({ children, requiredRole }: PrivateRouteProps) {
@@ -24,8 +24,12 @@ export function PrivateRoute({ children, requiredRole }: PrivateRouteProps) {
         return <Navigate to="/auth/login" replace />
     }
 
-    if (requiredRole && !user?.roles.includes(requiredRole)) {
-        return <Navigate to="/dashboard" replace />
+    if (requiredRole) {
+        const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
+        const hasRole = roles.some((r) => user?.roles.includes(r))
+        if (!hasRole) {
+            return <Navigate to="/dashboard" replace />
+        }
     }
 
     return <>{children}</>
