@@ -28,7 +28,7 @@ def _usuario_to_userpublic(usuario: Usuario) -> dict:
         "id": usuario.id,
         "email": usuario.email,
         "full_name": usuario.nombre,
-        "is_active": usuario.deleted_at is None,
+        "is_active": getattr(usuario, "deleted_at", None) is None,
         "roles": [usuario.rol.upper()],
     }
 

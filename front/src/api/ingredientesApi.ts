@@ -3,7 +3,7 @@ import apiClient from "./axiosInstance";
 export interface Ingrediente {
     id: number
     nombre: string
-    descripción: string | null
+    descripcion: string | null
     es_alergeno: boolean
 }
 
