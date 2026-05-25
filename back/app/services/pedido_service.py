@@ -213,7 +213,6 @@ def create_pedido(usuario: Usuario, data) -> dict:
                 cantidad=det.cantidad,
                 subtotal=subtotal,
             )
-            uow.session.add(detalle)
             detalles.append(detalle)
 
             # Descontar stock
