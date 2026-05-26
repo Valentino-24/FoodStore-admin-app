@@ -1,7 +1,6 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field
 
-
 class FormaPago(SQLModel, table=True):
     __tablename__ = "forma_pago"
 

@@ -2,7 +2,6 @@ from typing import Optional, List
 from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
 
-
 class Ingrediente(SQLModel, table=True):
     __tablename__ = "ingrediente"
 

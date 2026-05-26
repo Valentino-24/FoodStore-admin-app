@@ -4,7 +4,6 @@ from sqlmodel import Session, select
 from app.models.direccion_entrega import DireccionEntrega
 from app.repositories.base import BaseRepository
 
-
 class DireccionRepository(BaseRepository[DireccionEntrega]):
     def __init__(self, session: Session):
         super().__init__(session, DireccionEntrega)
@@ -32,7 +31,7 @@ class DireccionRepository(BaseRepository[DireccionEntrega]):
         return self.session.exec(stmt).first()
 
     def quitar_principal(self, usuario_id: int) -> None:
-        """Quita el flag es_principal de todas las direcciones del usuario."""
+
         stmt = (
             select(DireccionEntrega)
             .where(

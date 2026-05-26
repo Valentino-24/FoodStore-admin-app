@@ -8,9 +8,8 @@ from app.models.usuario import Usuario
 from app.models.usuario_rol import UsuarioRol
 from app.models.rol import Rol
 
-
 def create_usuario(data) -> dict:
-    """Crea un usuario (empleado) con el rol especificado. Solo para ADMIN."""
+
     VALID_ROLES = {"ADMIN", "STOCK", "PEDIDOS", "CLIENT"}
 
     rol_upper = data.rol.upper() if data.rol else "CLIENT"
@@ -33,7 +32,6 @@ def create_usuario(data) -> dict:
         )
         uow.usuarios.create(usuario)
 
-        # Asignar el rol en la tabla UsuarioRol
         rol_obj = uow.roles.get_by_codigo(rol_upper)
         if rol_obj:
             uow.session.add(UsuarioRol(usuario_id=usuario.id, rol_id=rol_obj.id))
@@ -46,7 +44,6 @@ def create_usuario(data) -> dict:
             "nombre": usuario.nombre,
             "rol": usuario.rol,
         }
-
 
 def list_usuarios(
     rol: Optional[str] = None,
@@ -73,14 +70,12 @@ def list_usuarios(
             "limit": limit,
         }
 
-
 def get_usuario(usuario_id: int) -> dict:
     with UnitOfWork() as uow:
         usuario = uow.usuarios.get_by_id_including_deleted(usuario_id)
         if not usuario:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-        # Obtener roles
         from sqlmodel import select
         from app.models.rol import Rol
         roles_usuario = uow.session.exec(
@@ -98,7 +93,6 @@ def get_usuario(usuario_id: int) -> dict:
                 for r in roles_usuario
             ],
         }
-
 
 def update_usuario(usuario_id: int, data) -> dict:
     with UnitOfWork() as uow:
@@ -122,7 +116,6 @@ def update_usuario(usuario_id: int, data) -> dict:
             "rol": usuario.rol,
         }
 
-
 def soft_delete_usuario(usuario_id: int) -> bool:
     with UnitOfWork() as uow:
         usuario = uow.usuarios.get_by_id(usuario_id)
@@ -132,14 +125,12 @@ def soft_delete_usuario(usuario_id: int) -> bool:
         uow.usuarios.soft_delete(usuario)
         return True
 
-
 def asignar_roles(usuario_id: int, roles_ids: List[int]) -> dict:
     with UnitOfWork() as uow:
         usuario = uow.usuarios.get_by_id(usuario_id)
         if not usuario:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-        # Validar que los roles existan
         from app.models.rol import Rol
         roles = []
         for rid in roles_ids:
@@ -148,17 +139,14 @@ def asignar_roles(usuario_id: int, roles_ids: List[int]) -> dict:
                 raise HTTPException(status_code=404, detail=f"Rol con id {rid} no encontrado")
             roles.append(rol)
 
-        # Eliminar roles actuales
         from sqlmodel import delete
         uow.session.exec(
             delete(UsuarioRol).where(UsuarioRol.usuario_id == usuario_id)
         )
 
-        # Asignar nuevos roles
         for rol in roles:
             uow.session.add(UsuarioRol(usuario_id=usuario_id, rol_id=rol.id))
 
-        # Actualizar el rol principal con el primer rol
         if roles:
             usuario.rol = roles[0].codigo
             uow.session.add(usuario)

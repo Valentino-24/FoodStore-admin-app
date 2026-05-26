@@ -5,9 +5,8 @@ from app.core.security import decode_access_token
 from app.core.uow import UnitOfWork
 from app.models.usuario import Usuario
 
-
 def get_current_user(request: Request) -> Usuario:
-    """Obtiene el usuario autenticado desde la cookie access_token."""
+
     token = request.cookies.get("access_token")
     if not token:
         raise HTTPException(status_code=401, detail="No autenticado")
@@ -26,9 +25,7 @@ def get_current_user(request: Request) -> Usuario:
             raise HTTPException(status_code=401, detail="Usuario no encontrado")
         return usuario
 
-
 class RoleChecker:
-    """Dependency que verifica que el usuario tenga UNO de los roles permitidos."""
 
     def __init__(self, allowed_roles: List[str]):
         self.allowed_roles = [r.upper() for r in allowed_roles]
@@ -41,8 +38,6 @@ class RoleChecker:
             )
         return usuario
 
-
-# Checkers predefinidos
 require_admin = RoleChecker(["ADMIN"])
 require_admin_or_stock = RoleChecker(["ADMIN", "STOCK"])
 require_admin_or_pedidos = RoleChecker(["ADMIN", "PEDIDOS"])

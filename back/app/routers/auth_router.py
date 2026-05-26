@@ -8,7 +8,6 @@ from app.core.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-
 def _set_token_cookie(response: Response, token: str) -> None:
     response.set_cookie(
         key="access_token",
@@ -21,9 +20,8 @@ def _set_token_cookie(response: Response, token: str) -> None:
         path="/",
     )
 
-
 def _usuario_to_userpublic(usuario: Usuario) -> dict:
-    """Convierte Usuario al formato UserPublic que espera el frontend."""
+
     return {
         "id": usuario.id,
         "email": usuario.email,
@@ -32,13 +30,11 @@ def _usuario_to_userpublic(usuario: Usuario) -> dict:
         "roles": [usuario.rol.upper()],
     }
 
-
 @router.post("/register")
 def register(data: UsuarioCreate, response: Response):
     token, usuario = auth_service.register_user(data)
     _set_token_cookie(response, token)
     return {"usuario": _usuario_to_userpublic(usuario), "access_token": token}
-
 
 @router.post("/login")
 def login(data: LoginRequest, response: Response):
@@ -46,18 +42,13 @@ def login(data: LoginRequest, response: Response):
     _set_token_cookie(response, token)
     return {"usuario": _usuario_to_userpublic(usuario), "access_token": token}
 
-
 @router.post("/token")
 def login_token(form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None):
-    """
-    Endpoint para login con form-urlencoded (username/password).
-    Especificamente para el frontend existente.
-    """
+
     login_data = LoginRequest(email=form_data.username, password=form_data.password)
     token, usuario = auth_service.login_user(login_data)
     _set_token_cookie(response, token)
     return {"access_token": token, "token_type": "bearer"}
-
 
 @router.post("/logout")
 def logout(response: Response):
@@ -70,8 +61,7 @@ def logout(response: Response):
     )
     return {"message": "Sesión cerrada"}
 
-
 @router.get("/me")
 def me(usuario: Usuario = Depends(auth_service.get_current_user)):
-    """Devuelve el usuario en formato UserPublic que espera el frontend."""
+
     return _usuario_to_userpublic(usuario)

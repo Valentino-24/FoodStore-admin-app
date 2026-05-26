@@ -10,7 +10,6 @@ from app.models.categoria import Categoria
 from app.models.ingrediente import Ingrediente
 from app.core.uow import UnitOfWork
 
-
 def delete_producto(producto_id: int):
     with UnitOfWork() as uow:
         producto = uow.productos.get_by_id(producto_id)
@@ -30,11 +29,9 @@ def delete_producto(producto_id: int):
             )
         )
 
-        # Soft delete en lugar de hard delete
         uow.productos.soft_delete(producto)
 
         return {"ok": True}
-
 
 def update_producto(producto_id: int, data):
     with UnitOfWork() as uow:
@@ -43,7 +40,6 @@ def update_producto(producto_id: int, data):
         if not producto:
             raise HTTPException(status_code=404, detail="Producto no encontrado")
 
-        # ACTUALIZAR CAMPOS
         if data.nombre is not None:
             producto.nombre = data.nombre
 
@@ -116,7 +112,6 @@ def update_producto(producto_id: int, data):
 
         return build_producto_response(uow, producto)
 
-
 def build_producto_response(uow: UnitOfWork, producto: Producto):
     categorias_rel = uow.session.exec(
         select(ProductoCategoria).where(ProductoCategoria.producto_id == producto.id)
@@ -156,7 +151,6 @@ def build_producto_response(uow: UnitOfWork, producto: Producto):
         "categorias": categorias,
         "ingredientes": ingredientes
     }
-
 
 def create_producto(data):
     with UnitOfWork() as uow:
@@ -214,13 +208,11 @@ def create_producto(data):
 
         return build_producto_response(uow, producto)
 
-
 def get_productos():
-    """Listado completo (para ADMIN)."""
+
     with UnitOfWork() as uow:
         productos = uow.productos.get_all()
         return [build_producto_response(uow, p) for p in productos]
-
 
 def get_productos_publicos(
     categoria_id: Optional[int] = None,
@@ -229,9 +221,7 @@ def get_productos_publicos(
     skip: int = 0,
     limit: int = 20,
 ) -> dict:
-    """
-    Listado público con filtros: categoría, disponibilidad, búsqueda por texto, paginación.
-    """
+
     with UnitOfWork() as uow:
         items = uow.productos.get_all_with_filters(
             categoria_id=categoria_id,
@@ -252,7 +242,6 @@ def get_productos_publicos(
             "limit": limit,
         }
 
-
 def get_producto(producto_id: int):
     with UnitOfWork() as uow:
         producto = uow.productos.get_by_id(producto_id)
@@ -260,12 +249,8 @@ def get_producto(producto_id: int):
             return None
         return build_producto_response(uow, producto)
 
-
 def toggle_disponibilidad(producto_id: int, disponible: bool) -> dict:
-    """
-    PATCH /disponibilidad para activar/desactivar un producto.
-    Accesible para ADMIN y STOCK.
-    """
+
     with UnitOfWork() as uow:
         producto = uow.productos.get_by_id(producto_id)
         if not producto:

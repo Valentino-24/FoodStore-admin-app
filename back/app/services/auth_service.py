@@ -11,7 +11,6 @@ from app.models.estado_pedido import EstadoPedido
 from app.models.forma_pago import FormaPago
 from app.schemas.usuario import UsuarioCreate, LoginRequest, UsuarioRead
 
-
 def get_current_user(request: Request) -> Usuario:
     token = request.cookies.get("access_token")
     if not token:
@@ -31,7 +30,6 @@ def get_current_user(request: Request) -> Usuario:
             raise HTTPException(status_code=401, detail="Usuario no encontrado")
         return usuario
 
-
 def register_user(data: UsuarioCreate) -> tuple[str, UsuarioRead]:
     with UnitOfWork() as uow:
         existing = uow.usuarios.get_by_email(data.email)
@@ -46,7 +44,6 @@ def register_user(data: UsuarioCreate) -> tuple[str, UsuarioRead]:
         )
         uow.usuarios.create(usuario)
 
-        # Asignar rol CLIENT automáticamente
         rol_client = uow.roles.get_by_codigo("CLIENT")
         if rol_client:
             uow.session.add(UsuarioRol(usuario_id=usuario.id, rol_id=rol_client.id))
@@ -60,7 +57,6 @@ def register_user(data: UsuarioCreate) -> tuple[str, UsuarioRead]:
             rol=usuario.rol,
         )
         return access_token, usuario_read
-
 
 def login_user(data: LoginRequest) -> tuple[str, UsuarioRead]:
     with UnitOfWork() as uow:
@@ -77,16 +73,14 @@ def login_user(data: LoginRequest) -> tuple[str, UsuarioRead]:
         )
         return access_token, usuario_read
 
-
 def seed_admin():
-    """Seed obligatorio: roles, estados de pedido, formas de pago y usuario admin."""
+
     with UnitOfWork() as uow:
         _seed_roles(uow)
         _seed_estados_pedido(uow)
         _seed_formas_pago(uow)
         _seed_admin_user(uow)
         uow.commit()
-
 
 def _seed_roles(uow: UnitOfWork):
     roles_data = [
@@ -99,7 +93,6 @@ def _seed_roles(uow: UnitOfWork):
         existing = uow.roles.get_by_codigo(r["codigo"])
         if not existing:
             uow.session.add(Rol(**r))
-
 
 def _seed_estados_pedido(uow: UnitOfWork):
     estados_data = [
@@ -117,7 +110,6 @@ def _seed_estados_pedido(uow: UnitOfWork):
         if not existing:
             uow.session.add(EstadoPedido(**e))
 
-
 def _seed_formas_pago(uow: UnitOfWork):
     formas_data = [
         {"codigo": "EFECTIVO", "nombre": "Efectivo"},
@@ -132,7 +124,6 @@ def _seed_formas_pago(uow: UnitOfWork):
         if not existing:
             uow.session.add(FormaPago(**f))
 
-
 def _seed_admin_user(uow: UnitOfWork):
     admin = uow.usuarios.get_by_email("admin@gmail.com")
     if admin:
@@ -146,7 +137,6 @@ def _seed_admin_user(uow: UnitOfWork):
     )
     uow.usuarios.create(usuario)
 
-    # Asignar rol ADMIN
     rol_admin = uow.roles.get_by_codigo("ADMIN")
     if rol_admin:
         uow.session.add(UsuarioRol(usuario_id=usuario.id, rol_id=rol_admin.id))

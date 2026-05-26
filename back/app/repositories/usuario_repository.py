@@ -4,7 +4,6 @@ from sqlmodel import Session, select
 from app.models.usuario import Usuario
 from app.repositories.base import BaseRepository
 
-
 class UsuarioRepository(BaseRepository[Usuario]):
     def __init__(self, session: Session):
         super().__init__(session, Usuario)

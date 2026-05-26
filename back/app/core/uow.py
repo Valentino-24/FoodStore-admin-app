@@ -8,7 +8,6 @@ from app.repositories.pedido_repository import PedidoRepository, DetallePedidoRe
 from app.repositories.direccion_repository import DireccionRepository
 from app.repositories.rol_repository import RolRepository
 
-
 class UnitOfWork:
 
     def __init__(self):

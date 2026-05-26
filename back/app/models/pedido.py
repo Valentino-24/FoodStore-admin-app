@@ -2,7 +2,6 @@ from typing import Optional, List
 from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
 
-
 class Pedido(SQLModel, table=True):
     __tablename__ = "pedido"
 
@@ -17,7 +16,6 @@ class Pedido(SQLModel, table=True):
     total: float
     deleted_at: Optional[datetime] = Field(default=None, sa_column_kwargs={"nullable": True})
 
-    # Relationships
     usuario: Optional["Usuario"] = Relationship(back_populates="pedidos")
     estado_actual: Optional["EstadoPedido"] = Relationship()
     forma_pago: Optional["FormaPago"] = Relationship()

@@ -5,7 +5,6 @@ from app.models.categoria import Categoria
 from app.models.producto_categoria import ProductoCategoria
 from app.repositories.base import BaseRepository
 
-
 class CategoriaRepository(BaseRepository[Categoria]):
     def __init__(self, session: Session):
         super().__init__(session, Categoria)
@@ -28,7 +27,7 @@ class CategoriaRepository(BaseRepository[Categoria]):
         return len(self.session.exec(stmt).all())
 
     def tiene_productos_activos(self, categoria_id: int) -> bool:
-        """Verifica si la categoría tiene productos activos asociados."""
+
         stmt = (
             select(ProductoCategoria)
             .where(ProductoCategoria.categoria_id == categoria_id)

@@ -9,15 +9,13 @@ from app.schemas.admin import UsuarioAdminUpdate, UsuarioCreateAdmin, AsignarRol
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
-
 @router.post("/usuarios")
 def create_usuario(
     data: UsuarioCreateAdmin,
     _: Usuario = Depends(require_admin),
 ):
-    """Crear un nuevo usuario (empleado) con rol específico."""
-    return admin_service.create_usuario(data)
 
+    return admin_service.create_usuario(data)
 
 @router.get("/usuarios")
 def list_usuarios(
@@ -26,18 +24,16 @@ def list_usuarios(
     limit: int = Query(20, ge=1, le=100),
     _: Usuario = Depends(require_admin),
 ):
-    """Listado paginado de usuarios con filtro por rol."""
-    return admin_service.list_usuarios(rol=rol, skip=skip, limit=limit)
 
+    return admin_service.list_usuarios(rol=rol, skip=skip, limit=limit)
 
 @router.get("/usuarios/{usuario_id}")
 def get_usuario(
     usuario_id: int,
     _: Usuario = Depends(require_admin),
 ):
-    """Obtener detalle de un usuario (incluyendo roles)."""
-    return admin_service.get_usuario(usuario_id)
 
+    return admin_service.get_usuario(usuario_id)
 
 @router.put("/usuarios/{usuario_id}")
 def update_usuario(
@@ -45,19 +41,17 @@ def update_usuario(
     data: UsuarioAdminUpdate,
     _: Usuario = Depends(require_admin),
 ):
-    """Actualizar usuario (nombre, email, rol)."""
-    return admin_service.update_usuario(usuario_id, data)
 
+    return admin_service.update_usuario(usuario_id, data)
 
 @router.delete("/usuarios/{usuario_id}")
 def delete_usuario(
     usuario_id: int,
     _: Usuario = Depends(require_admin),
 ):
-    """Soft delete de usuario."""
+
     result = admin_service.soft_delete_usuario(usuario_id)
     return {"ok": True}
-
 
 @router.post("/usuarios/{usuario_id}/roles")
 def asignar_roles(
@@ -65,5 +59,5 @@ def asignar_roles(
     data: AsignarRolesRequest,
     _: Usuario = Depends(require_admin),
 ):
-    """Asignar roles a un usuario."""
+
     return admin_service.asignar_roles(usuario_id, data.roles_ids)

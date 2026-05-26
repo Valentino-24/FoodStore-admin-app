@@ -2,12 +2,7 @@ from typing import Optional
 from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
 
-
 class HistorialEstadoPedido(SQLModel, table=True):
-    """
-    Audit Trail Append-Only para la máquina de estados del pedido.
-    Solo INSERTs — jamás UPDATE o DELETE.
-    """
 
     __tablename__ = "historial_estado_pedido"
 

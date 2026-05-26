@@ -5,7 +5,6 @@ from sqlalchemy import or_
 from app.models.producto import Producto
 from app.repositories.base import BaseRepository
 
-
 class ProductoRepository(BaseRepository[Producto]):
     def __init__(self, session: Session):
         super().__init__(session, Producto)

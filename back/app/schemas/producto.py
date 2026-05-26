@@ -1,22 +1,18 @@
 from typing import Optional, List
 from sqlmodel import SQLModel
 
-
 class CategoriaSimple(SQLModel):
     id: int
     nombre: str
     es_principal: bool = False
 
-
 class IngredienteSimple(SQLModel):
     id: int
     nombre: str
 
-
 class CategoriaInput(SQLModel):
     id: int
     es_principal: bool = False
-
 
 class ProductoCreate(SQLModel):
     nombre: str
@@ -26,9 +22,8 @@ class ProductoCreate(SQLModel):
     stock_cantidad: int
     disponible: bool = True
 
-    categorias: List[CategoriaInput] = []  
+    categorias: List[CategoriaInput] = []
     ingredientes_ids: List[int] = []
-
 
 class ProductoRead(SQLModel):
     id: int
@@ -41,7 +36,6 @@ class ProductoRead(SQLModel):
 
     categorias: List[CategoriaSimple] = []
     ingredientes: List[IngredienteSimple] = []
-
 
 class ProductoUpdate(SQLModel):
     nombre: Optional[str] = None

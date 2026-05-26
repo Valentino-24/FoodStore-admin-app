@@ -7,7 +7,6 @@ from app.models.detalle_pedido import DetallePedido
 from app.models.historial_estado_pedido import HistorialEstadoPedido
 from app.repositories.base import BaseRepository
 
-
 class PedidoRepository(BaseRepository[Pedido]):
     def __init__(self, session: Session):
         super().__init__(session, Pedido)
@@ -42,11 +41,9 @@ class PedidoRepository(BaseRepository[Pedido]):
         )
         return self.session.exec(stmt).all()
 
-
 class DetallePedidoRepository(BaseRepository[DetallePedido]):
     def __init__(self, session: Session):
         super().__init__(session, DetallePedido)
-
 
 class HistorialEstadoPedidoRepository(BaseRepository[HistorialEstadoPedido]):
     def __init__(self, session: Session):

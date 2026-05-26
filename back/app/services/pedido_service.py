@@ -12,28 +12,22 @@ from app.models.producto import Producto
 from app.models.direccion_entrega import DireccionEntrega
 from app.models.usuario import Usuario
 
-
-# ─── Máquina de estados ─────────────────────────────────────────
-# Transiciones válidas: {estado_actual_codigo: [estados_destino_codigo]}
 TRANSICIONES_VALIDAS = {
     "PENDIENTE": ["CONFIRMADO", "CANCELADO"],
     "CONFIRMADO": ["EN_PREP", "CANCELADO"],
     "EN_PREP": ["EN_CAMINO"],
     "EN_CAMINO": ["ENTREGADO"],
-    "ENTREGADO": [],     # Estado terminal
-    "CANCELADO": [],     # Estado terminal
+    "ENTREGADO": [],
+    "CANCELADO": [],
 }
 
-# Estados desde los cuales el CLIENTE puede cancelar
 ESTADOS_CANCELABLES_POR_CLIENTE = {"PENDIENTE", "CONFIRMADO"}
-
 
 def _get_estado_por_id(uow: UnitOfWork, estado_id: int) -> EstadoPedido:
     estado = uow.session.get(EstadoPedido, estado_id)
     if not estado:
         raise HTTPException(status_code=404, detail="Estado de pedido no encontrado")
     return estado
-
 
 def _get_estado_por_codigo(uow: UnitOfWork, codigo: str) -> EstadoPedido:
     estado = uow.session.exec(
@@ -43,7 +37,6 @@ def _get_estado_por_codigo(uow: UnitOfWork, codigo: str) -> EstadoPedido:
         raise HTTPException(status_code=404, detail=f"Estado '{codigo}' no encontrado")
     return estado
 
-
 def _validar_transicion(estado_actual_codigo: str, nuevo_estado_codigo: str) -> None:
     destinos = TRANSICIONES_VALIDAS.get(estado_actual_codigo, [])
     if nuevo_estado_codigo not in destinos:
@@ -52,7 +45,6 @@ def _validar_transicion(estado_actual_codigo: str, nuevo_estado_codigo: str) -> 
             detail=f"Transición inválida: {estado_actual_codigo} → {nuevo_estado_codigo}. "
                    f"Transiciones permitidas: {destinos}",
         )
-
 
 def _registrar_historial(
     uow: UnitOfWork,
@@ -72,11 +64,8 @@ def _registrar_historial(
     uow.session.add(historial)
     return historial
 
-
 def _build_pedido_response(uow: UnitOfWork, pedido: Pedido) -> dict:
-    """Construye la respuesta con todas las relaciones."""
 
-    # Refrescar con relaciones
     stmt = (
         select(Pedido)
         .where(Pedido.id == pedido.id)
@@ -89,7 +78,6 @@ def _build_pedido_response(uow: UnitOfWork, pedido: Pedido) -> dict:
     )
     pedido = uow.session.exec(stmt).first()
 
-    # Obtener historial
     historial = uow.historial_estados.get_by_pedido(pedido.id)
     historial_data = []
     for h in historial:
@@ -151,21 +139,14 @@ def _build_pedido_response(uow: UnitOfWork, pedido: Pedido) -> dict:
         "historial_estados": historial_data,
     }
 
-
-# ─── Servicios ──────────────────────────────────────────────────
-
 def create_pedido(usuario: Usuario, data) -> dict:
-    """
-    Crea un pedido con transacción atómica (Unit of Work).
-    Snapshot Pattern: guarda precio y nombre del producto inmutables.
-    """
+
     with UnitOfWork() as uow:
-        # Validar forma de pago
+
         fp = uow.session.get(FormaPago, data.forma_pago_id)
         if not fp:
             raise HTTPException(status_code=404, detail="Forma de pago no encontrada")
 
-        # Validar dirección si se proporciona
         if data.direccion_entrega_id:
             direccion = uow.session.get(DireccionEntrega, data.direccion_entrega_id)
             if not direccion or direccion.deleted_at is not None:
@@ -173,14 +154,11 @@ def create_pedido(usuario: Usuario, data) -> dict:
             if direccion.usuario_id != usuario.id:
                 raise HTTPException(status_code=403, detail="La dirección no pertenece al usuario")
 
-        # Validar que haya detalles
         if not data.detalles:
             raise HTTPException(status_code=400, detail="El pedido debe tener al menos un detalle")
 
-        # Obtener estado inicial PENDIENTE
         estado_pendiente = _get_estado_por_codigo(uow, "PENDIENTE")
 
-        # Calcular total y crear detalles (Snapshot Pattern)
         total = 0.0
         detalles = []
         for det in data.detalles:
@@ -205,7 +183,6 @@ def create_pedido(usuario: Usuario, data) -> dict:
             subtotal = producto.precio_base * det.cantidad
             total += subtotal
 
-            # Snapshot Pattern: guardar nombre y precio actuales
             detalle = DetallePedido(
                 producto_id=producto.id,
                 nombre_producto=producto.nombre,
@@ -215,11 +192,9 @@ def create_pedido(usuario: Usuario, data) -> dict:
             )
             detalles.append(detalle)
 
-            # Descontar stock
             producto.stock_cantidad -= det.cantidad
             uow.session.add(producto)
 
-        # Crear pedido
         pedido = Pedido(
             usuario_id=usuario.id,
             estado_actual_id=estado_pendiente.id,
@@ -228,14 +203,12 @@ def create_pedido(usuario: Usuario, data) -> dict:
             total=round(total, 2),
         )
         uow.session.add(pedido)
-        uow.session.flush()  # Para obtener el ID del pedido
+        uow.session.flush()
 
-        # Vincular detalles al pedido
         for det in detalles:
             det.pedido_id = pedido.id
             uow.session.add(det)
 
-        # Registrar historial inicial
         _registrar_historial(
             uow,
             pedido_id=pedido.id,
@@ -250,27 +223,20 @@ def create_pedido(usuario: Usuario, data) -> dict:
 
         return _build_pedido_response(uow, pedido)
 
-
 def get_pedido(pedido_id: int, usuario: Usuario) -> dict:
-    """Obtiene un pedido. CLIENT solo ve sus propios pedidos."""
+
     with UnitOfWork() as uow:
         pedido = uow.pedidos.get_by_id_with_relations(pedido_id)
         if not pedido:
             raise HTTPException(status_code=404, detail="Pedido no encontrado")
 
-        # CLIENT solo ve sus propios pedidos
         if usuario.rol.upper() == "CLIENT" and pedido.usuario_id != usuario.id:
             raise HTTPException(status_code=403, detail="No tienes acceso a este pedido")
 
         return _build_pedido_response(uow, pedido)
 
-
 def list_pedidos(usuario: Usuario) -> list:
-    """
-    Lista pedidos.
-    - CLIENT: solo sus propios pedidos
-    - ADMIN/PEDIDOS: todos los pedidos
-    """
+
     with UnitOfWork() as uow:
         if usuario.rol.upper() in ("ADMIN", "PEDIDOS"):
             pedidos = uow.pedidos.get_all_activos()
@@ -279,17 +245,13 @@ def list_pedidos(usuario: Usuario) -> list:
 
         return [_build_pedido_response(uow, p) for p in pedidos]
 
-
 def cambiar_estado_pedido(
     pedido_id: int,
     nuevo_estado_id: int,
     usuario: Usuario,
     observacion: str | None = None,
 ) -> dict:
-    """
-    Avanza el estado de un pedido.
-    La validación de la máquina de estados se hace en el service, nunca en el router.
-    """
+
     with UnitOfWork() as uow:
         pedido = uow.pedidos.get_by_id_with_relations(pedido_id)
         if not pedido:
@@ -298,10 +260,8 @@ def cambiar_estado_pedido(
         estado_actual = _get_estado_por_id(uow, pedido.estado_actual_id)
         estado_nuevo = _get_estado_por_id(uow, nuevo_estado_id)
 
-        # Validar transición
         _validar_transicion(estado_actual.codigo, estado_nuevo.codigo)
 
-        # Si es CLIENT, solo puede cancelar sus propios pedidos
         if usuario.rol.upper() == "CLIENT":
             if pedido.usuario_id != usuario.id:
                 raise HTTPException(status_code=403, detail="No puedes cambiar el estado de este pedido")
@@ -314,14 +274,11 @@ def cambiar_estado_pedido(
                            f"Solo se puede cancelar desde: {', '.join(ESTADOS_CANCELABLES_POR_CLIENTE)}",
                 )
 
-        # Guardar estado anterior para el historial
         estado_anterior_id = pedido.estado_actual_id
 
-        # Actualizar estado
         pedido.estado_actual_id = nuevo_estado_id
         uow.session.add(pedido)
 
-        # Registrar en audit trail
         _registrar_historial(
             uow,
             pedido_id=pedido.id,
@@ -335,9 +292,8 @@ def cambiar_estado_pedido(
 
         return _build_pedido_response(uow, pedido)
 
-
 def get_historial_pedido(pedido_id: int, usuario: Usuario) -> list:
-    """Obtiene el historial completo de transiciones de un pedido."""
+
     with UnitOfWork() as uow:
         pedido = uow.pedidos.get_by_id(pedido_id)
         if not pedido:
@@ -370,9 +326,8 @@ def get_historial_pedido(pedido_id: int, usuario: Usuario) -> list:
             for h in historial
         ]
 
-
 def get_estados_posibles(pedido_id: int, usuario: Usuario) -> list:
-    """Devuelve los estados a los que se puede transicionar desde el estado actual."""
+
     with UnitOfWork() as uow:
         pedido = uow.pedidos.get_by_id(pedido_id)
         if not pedido:
@@ -385,14 +340,12 @@ def get_estados_posibles(pedido_id: int, usuario: Usuario) -> list:
         if not estado_actual:
             return []
 
-        # Si es CLIENT, solo puede ver CANCELADO como opción
         if usuario.rol.upper() == "CLIENT":
             if estado_actual.codigo in ESTADOS_CANCELABLES_POR_CLIENTE:
                 cancelado = _get_estado_por_codigo(uow, "CANCELADO")
                 return [{"id": cancelado.id, "codigo": cancelado.codigo, "nombre": cancelado.nombre}]
             return []
 
-        # Para ADMIN/PEDIDOS, devolver todas las transiciones posibles
         codigos_destino = TRANSICIONES_VALIDAS.get(estado_actual.codigo, [])
         if not codigos_destino:
             return []

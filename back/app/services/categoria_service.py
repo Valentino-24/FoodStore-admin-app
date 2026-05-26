@@ -7,25 +7,22 @@ from app.models.categoria import Categoria
 from app.models.producto_categoria import ProductoCategoria
 from app.core.uow import UnitOfWork
 
-
 def create_categoria(data):
     with UnitOfWork() as uow:
         categoria = Categoria(**data.model_dump())
         uow.categorias.create(categoria)
         return categoria
 
-
 def get_all_categorias():
     with UnitOfWork() as uow:
         return uow.categorias.get_all()
-
 
 def get_categorias_publicas(
     parent_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 20,
 ) -> dict:
-    """Listado público con filtro por parent_id y paginación."""
+
     with UnitOfWork() as uow:
         items = uow.categorias.get_by_parent(parent_id, skip=skip, limit=limit)
         total = uow.categorias.count_by_parent(parent_id)
@@ -36,11 +33,9 @@ def get_categorias_publicas(
             "limit": limit,
         }
 
-
 def get_categoria(categoria_id: int):
     with UnitOfWork() as uow:
         return uow.categorias.get_by_id(categoria_id)
-
 
 def update_categoria(categoria_id: int, data):
     with UnitOfWork() as uow:
@@ -54,21 +49,18 @@ def update_categoria(categoria_id: int, data):
 
         return uow.categorias.update(categoria)
 
-
 def delete_categoria(categoria_id: int):
     with UnitOfWork() as uow:
         categoria = uow.categorias.get_by_id(categoria_id)
         if not categoria:
             return None
 
-        # Validación: no se puede eliminar si tiene productos activos (HTTP 409)
         if uow.categorias.tiene_productos_activos(categoria_id):
             raise HTTPException(
                 status_code=409,
                 detail="No se puede eliminar la categoría porque tiene productos asociados activos",
             )
 
-        # Eliminar relaciones con productos
         productos_asociados = uow.session.exec(
             select(ProductoCategoria).where(ProductoCategoria.categoria_id == categoria_id)
         ).all()
@@ -76,7 +68,6 @@ def delete_categoria(categoria_id: int):
         for prod_cat in productos_asociados:
             uow.session.delete(prod_cat)
 
-        # Actualizar hijos para quitar parent_id
         children = uow.session.exec(
             select(Categoria).where(Categoria.parent_id == categoria_id)
         ).all()
@@ -86,6 +77,6 @@ def delete_categoria(categoria_id: int):
             uow.session.add(child)
 
         uow.commit()
-        # Soft delete
+
         uow.categorias.soft_delete(categoria)
         return True

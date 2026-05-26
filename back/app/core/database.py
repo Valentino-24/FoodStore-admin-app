@@ -3,18 +3,13 @@ from app.core.config import settings
 
 engine = create_engine(settings.DATABASE_URL, echo=True)
 
-
 def create_db_and_tables():
-    """Crea tablas y migra columnas faltantes para desarrollo."""
+
     SQLModel.metadata.create_all(engine)
     _migrate_existing_tables()
 
-
 def _migrate_existing_tables():
-    """
-    Migración automática para desarrollo: agrega columnas faltantes
-    a tablas existentes sin borrar datos.
-    """
+
     migraciones = [
         ("usuario", "deleted_at", "TIMESTAMP WITHOUT TIME ZONE"),
         ("categoria", "deleted_at", "TIMESTAMP WITHOUT TIME ZONE"),
@@ -30,7 +25,6 @@ def _migrate_existing_tables():
                 session.commit()
             except Exception:
                 session.rollback()
-
 
 def get_session():
     with Session(engine) as session:

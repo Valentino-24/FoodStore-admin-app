@@ -1,7 +1,6 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field, Relationship
 
-
 class UsuarioRol(SQLModel, table=True):
     __tablename__ = "usuario_rol"
 

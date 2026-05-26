@@ -12,7 +12,6 @@ from app.routers import (
 )
 from app.services.auth_service import seed_admin
 
-
 app = FastAPI(
     title="FoodStore API",
     description="API de FoodStore con autenticación, RBAC, pedidos y más",
@@ -36,18 +35,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
     seed_admin()
 
-
-# Rutas api/v1
-app.include_router(auth_router.router, prefix="/api/v1")
-app.include_router(categoria_router.router, prefix="/api/v1")
-app.include_router(producto_router.router, prefix="/api/v1")
-app.include_router(ingrediente_router.router, prefix="/api/v1")
-app.include_router(pedido_router.router, prefix="/api/v1")
-app.include_router(direccion_router.router, prefix="/api/v1")
-app.include_router(admin_router.router, prefix="/api/v1")
+app.include_router(auth_router.router, prefix="/api")
+app.include_router(categoria_router.router, prefix="/api")
+app.include_router(producto_router.router, prefix="/api")
+app.include_router(ingrediente_router.router, prefix="/api")
+app.include_router(pedido_router.router, prefix="/api")
+app.include_router(direccion_router.router, prefix="/api")
+app.include_router(admin_router.router, prefix="/api")

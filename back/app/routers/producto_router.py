@@ -9,9 +9,6 @@ from app.core.dependencies import require_admin, require_admin_or_stock, require
 
 router = APIRouter(prefix="/productos", tags=["Productos"])
 
-
-# ─── Endpoints públicos ─────────────────────────────────────────
-
 @router.get("/")
 def get_productos_publicos(
     categoria_id: Optional[int] = Query(None, description="Filtrar por categoría"),
@@ -20,9 +17,7 @@ def get_productos_publicos(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
 ):
-    """
-    Listado público con filtros: categoría, disponibilidad, búsqueda por texto, paginación.
-    """
+
     return producto_service.get_productos_publicos(
         categoria_id=categoria_id,
         disponible=disponible,
@@ -31,34 +26,28 @@ def get_productos_publicos(
         limit=limit,
     )
 
-
 @router.get("/all", response_model=list[ProductoRead])
 def get_all_productos(
     _: Usuario = Depends(require_any),
 ):
-    """Listado completo (requiere autenticación)."""
-    return producto_service.get_productos()
 
+    return producto_service.get_productos()
 
 @router.get("/{producto_id}", response_model=ProductoRead)
 def get_producto(producto_id: int):
-    """Público: detalle de un producto."""
+
     producto = producto_service.get_producto(producto_id)
     if not producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     return producto
-
-
-# ─── Endpoints protegidos ───────────────────────────────────────
 
 @router.post("/", response_model=ProductoRead)
 def create_producto(
     data: ProductoCreate,
     _: Usuario = Depends(require_admin),
 ):
-    """Crear producto (solo ADMIN)."""
-    return producto_service.create_producto(data)
 
+    return producto_service.create_producto(data)
 
 @router.put("/{producto_id}", response_model=ProductoRead)
 def update_producto(
@@ -66,18 +55,16 @@ def update_producto(
     data: ProductoUpdate,
     _: Usuario = Depends(require_admin),
 ):
-    """Actualizar producto (solo ADMIN)."""
-    return producto_service.update_producto(producto_id, data)
 
+    return producto_service.update_producto(producto_id, data)
 
 @router.delete("/{producto_id}")
 def delete_producto(
     producto_id: int,
     _: Usuario = Depends(require_admin),
 ):
-    """Soft delete de producto (solo ADMIN)."""
-    return producto_service.delete_producto(producto_id)
 
+    return producto_service.delete_producto(producto_id)
 
 @router.patch("/{producto_id}/disponibilidad")
 def toggle_disponibilidad(
@@ -85,8 +72,5 @@ def toggle_disponibilidad(
     disponible: bool = Query(..., description="Nuevo estado de disponibilidad"),
     _: Usuario = Depends(require_admin_or_stock),
 ):
-    """
-    Activar/desactivar un producto.
-    Accesible para ADMIN y STOCK.
-    """
+
     return producto_service.toggle_disponibilidad(producto_id, disponible)

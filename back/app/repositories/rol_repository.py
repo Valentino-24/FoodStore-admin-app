@@ -4,7 +4,6 @@ from sqlmodel import Session, select
 from app.models.rol import Rol
 from app.repositories.base import BaseRepository
 
-
 class RolRepository(BaseRepository[Rol]):
     def __init__(self, session: Session):
         super().__init__(session, Rol)
